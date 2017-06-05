@@ -1,0 +1,87 @@
+node_types:
+    nodes.Container.Application.Kubernetes:
+        derived_from: tosca.nodes.Root
+        properties:
+            name:
+              type: string
+              required: true
+            image:
+              type: string
+              required: true
+            port:
+              type: integer
+              required: false
+        interfaces:
+            Standard:
+                type: tosca.interfaces.node.lifecycle.Standard
+                inputs: 
+                    name:
+                        type: string
+                        required: true
+                    image:
+                        type: string
+                        required: true
+                    exposed_port:
+                        type: integer
+                        required: false
+                    target_port:
+                        type: integer
+                        required: false
+                    target_host:
+                        type: integer
+                        required: false
+                    labels:
+                        type: string
+                        required: false
+                    isService:
+                        type: boolean
+                        required: false
+                create:
+                        inputs: 
+                            name:
+                                type: string
+                                required: true
+                            image:
+                                type: string
+                                required: true
+                            exposed_port:
+                                type: integer
+                                required: false
+                            target_port:
+                                type: integer
+                                required: false
+                            target_host:
+                                type: string 
+                                required: false
+                            labels:
+                                type: string
+                                required: false
+                            isService:
+                                type: boolean
+                                required: false
+                        implementation: 
+                            primary: sample > sample.samplemethod 
+policy_types:
+
+  aria.Plugin:
+    _extensions:
+      shorthand_name: Plugin
+      type_qualified_name: aria:Plugin
+      role: plugin
+    description: 
+      Policy used to specify plugins used by services. For an operation to be able to use a plugin
+      it must have a matching policy. The name of the policy must be the name of the plugin. The
+      optional properties can be used to further specify plugin selection by the orchestrator.
+    derived_from: tosca.policies.Root
+    properties:
+      version:
+        description: 
+          Minimum plugin version.
+        type: version
+        required: false
+      enabled:
+        description: 
+          If the policy is to disable the plugin then it will be ignored and all operations and
+          workflows depending on it will also be disabled.
+        type: boolean
+        default: true

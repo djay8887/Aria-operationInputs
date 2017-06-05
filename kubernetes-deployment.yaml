@@ -1,0 +1,90 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - types/kubernetes_type.yaml 
+
+topology_template:
+
+    inputs:
+        web_app_name:
+            type: string
+            value: tosca-webapp
+
+        web_app_image:
+            type: string
+            value: kuber-master:5000/webwithdbinput
+
+        web_app_port:
+            type: integer
+            value: 80
+
+        db_name:
+            type: string
+            value: tosca-database
+        
+        db_image:
+            type: string
+            value: kuber-master:5000/dbforweb
+        
+        db_port:
+            type: integer
+            value: 3306
+
+    
+    policies:
+      sample: 
+        type: aria.Plugin 
+        description: policy_description
+        properties:
+                version: 1.0 
+                enabled: true
+      
+    node_templates:
+        web_app:
+            type: nodes.Container.Application.Kubernetes
+            properties:
+                name: { get_input: web_app_name }
+                image: { get_input: web_app_image }
+                port: { get_input: web_app_port }
+            requirements:
+                - dependency:
+                      node: database
+                      relationship:
+                          type: tosca.relationships.DependsOn
+            interfaces:
+                Standard:
+                    inputs: 
+                        name: { get_property: [ web_app, name] }
+                        image: { get_property: [ web_app, image] }
+                        exposed_port: { get_property: [ web_app, port] }
+                        target_host: { get_property: [ database, name] }
+                        target_port: { get_property: [ database, port] }
+                        isService: true
+                    create: 
+                        inputs:
+                            name: { get_property: [ web_app, name] }
+                            image: { get_property: [ web_app, image] }
+                            exposed_port: { get_property: [ web_app, port] }
+                            target_host: { get_property: [ database, name] }
+                            target_port: { get_property: [ database, port] }
+                            isService: true
+        
+        database:
+            type: nodes.Container.Application.Kubernetes
+            properties:
+                name: { get_input: db_name }
+                image: { get_input: db_image }
+                port: { get_input: db_port }
+            interfaces:
+                Standard:
+                    inputs: 
+                        name: { get_property: [ database, name] }
+                        image: { get_property: [ database, image] }
+                        exposed_port: { get_property: [ database, port] }
+                        isService: true
+                    create:
+                        inputs: 
+                            name: { get_property: [ database, name] }
+                            image: { get_property: [ database, image] }
+                            exposed_port: { get_property: [ database, port] }
+                            isService: true
